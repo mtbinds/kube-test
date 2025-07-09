@@ -4,8 +4,7 @@ pipeline {
   environment {
     IMAGE_NAME = "flask-app"
     IMAGE_TAG = "latest"
-    LOCAL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
-    
+    LOCAL_IMAGE = "flask-app:latest"
   }
 
   stages {
@@ -17,20 +16,27 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh '''
-          echo "Construction de l'image Docker locale"
-          eval $(minikube docker-env) && docker build -t $LOCAL_IMAGE .
-        '''
+        script {
+          sh '''
+            echo "Configuration de l'environnement Docker de Minikube"
+            eval $(minikube docker-env)
+
+            echo "Construction de l'image Docker locale : flask-app:latest"
+            docker build -t flask-app:latest .
+          '''
+        }
       }
     }
 
-
     stage('Déploiement Minikube') {
       steps {
-        sh '''
-          echo "Déploiement sur Minikube"
-          eval $(minikube docker-env) && kubectl apply -f deployment.yaml
-        '''
+        script {
+          sh '''
+            echo "Déploiement de l'application sur Minikube"
+            eval $(minikube docker-env)
+            kubectl apply -f deployment.yaml
+          '''
+        }
       }
     }
   }
