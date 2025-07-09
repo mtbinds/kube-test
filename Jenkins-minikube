@@ -19,7 +19,7 @@ pipeline {
       steps {
         sh '''
           echo "Construction de l'image Docker locale"
-          eval $(minikube docker-env) docker build -t $LOCAL_IMAGE .
+          eval $(minikube docker-env) && docker build -t $LOCAL_IMAGE .
         '''
       }
     }
