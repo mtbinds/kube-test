@@ -1,0 +1,46 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE_NAME = "flask-app"
+    IMAGE_TAG = "latest"
+    LOCAL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
+    
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'https://github.com/mtbinds/kube-test.git'
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh '''
+          echo "Construction de l'image Docker locale"
+          docker build -t $LOCAL_IMAGE .
+        '''
+      }
+    }
+
+
+    stage('Déploiement Minikube') {
+      steps {
+        sh '''
+          echo "Déploiement sur Minikube"
+          eval $(minikube docker-env) && kubectl apply -f deployment.yaml
+        '''
+      }
+    }
+  }
+
+  post {
+    success {
+      echo 'Pipeline terminé avec succès.'
+    }
+    failure {
+      echo 'Une erreur est survenue.'
+    }
+  }
+}
